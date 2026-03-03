@@ -1,164 +1,92 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 
 <head>
      <meta charset="UTF-8">
      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <title>Mini Aula de Matemática</title>
+     <title>KaTeX JS Math Formula Online Editor</title>
 
-     <!-- Marked.js -->
-     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
-
-     <!-- KaTeX CSS -->
+     <!-- KaTeX -->
      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
 
-     <style>
-          body {
-               font-family: sans-serif;
-               margin: 1rem;
-               background: #fafafa;
-               color: #222;
-               line-height: 1.6;
-          }
-
-          h2 {
-               margin-bottom: 1rem;
-               font-size: 2rem;
-               text-align: center;
-          }
-
-          textarea {
-               width: 100%;
-               min-height: 250px;
-               font-family: monospace;
-               font-size: 16px;
-               padding: 0.75rem;
-               margin-bottom: 1rem;
-               border: 1px solid #ccc;
-               border-radius: 6px;
-               resize: vertical;
-               box-sizing: border-box;
-          }
-
-          button {
-               padding: 0.6rem 1.2rem;
-               cursor: pointer;
-               background: #0078d4;
-               color: white;
-               border: none;
-               border-radius: 6px;
-               font-size: 16px;
-               margin-right: 0.5rem;
-               transition: background 0.3s;
-          }
-
-          button:hover {
-               background: #005a9e;
-          }
-
-          #rendered-content {
-               border: 1px solid #ccc;
-               padding: 1rem;
-               min-height: 300px;
-               background: #fff;
-               white-space: pre-wrap;
-               font-size: 16px;
-               border-radius: 6px;
-               box-sizing: border-box;
-          }
-
-          /* Responsividade */
-          @media (max-width: 768px) {
-               h2 {
-                    font-size: 1.5rem;
-               }
-
-               textarea {
-                    font-size: 14px;
-               }
-
-               button {
-                    font-size: 14px;
-                    padding: 0.5rem 1rem;
-                    margin-bottom: 0.5rem;
-               }
-
-               #rendered-content {
-                    font-size: 14px;
-                    min-height: 200px;
-               }
-          }
-
-          /* Impressão */
-          @media print {
-
-               textarea,
-               button {
-                    display: none;
-               }
-
-               #rendered-content {
-                    border: none;
-                    background: white;
-                    font-size: 16px;
-               }
-          }
-     </style>
+     <!-- Styles -->
+     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-     <h2>Mini Aula de Matemática</h2>
 
-     <textarea id="editor"># Aula 1: Equação do 1º grau
+     <!-- ── Header ── -->
+     <header>
+          <div class="title-block">
+               <h1><span class="accent">KaTeX</span> JS Math Formula Online Editor</h1>
+               <span class="badge">v1.0</span>
+          </div>
+     </header>
 
-A forma geral é:
+     <!-- ── Main layout ── -->
+     <main>
 
-$$
-ax + b = 0
-$$
+          <!-- Left: Editor panel -->
+          <div class="panel">
+               <div class="panel-header">
+                    <span class="panel-label">// input</span>
+                    <div class="toggle-row">
+                         <button class="toggle on" id="autoToggle" onclick="toggleAuto()"
+                              title="Toggle auto-render"></button>
+                         auto-render
+                    </div>
+               </div>
 
-Exemplo:
+               <!-- Snippet toolbar -->
+               <div class="toolbar">
+                    <button onclick="insertSnippet('frac')" title="Fraction">½ frac</button>
+                    <button onclick="insertSnippet('sqrt')" title="Square root">√ sqrt</button>
+                    <button onclick="insertSnippet('sum')" title="Summation">∑ sum</button>
+                    <button onclick="insertSnippet('int')" title="Integral">∫ integral</button>
+                    <button onclick="insertSnippet('lim')" title="Limit">lim</button>
+                    <button onclick="insertSnippet('deriv')" title="Derivative">d/dx</button>
+                    <button onclick="insertSnippet('matrix')" title="Matrix">⊞ matrix</button>
+                    <button onclick="insertSnippet('vec')" title="Vector">→ vec</button>
+               </div>
 
-$$
-2x + 5 = 0
-$$
-</textarea>
+               <textarea id="editor" spellcheck="false" autocorrect="off" autocomplete="off"
+                    placeholder="Type your formulas here...&#10;&#10;Display block:  $$\frac{a}{b}$$&#10;Inline:         $E = mc^2$">$$x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$
 
-     <div>
-          <button onclick="renderAula()">Renderizar</button>
-          <button onclick="exportPDF()">Exportar PDF</button>
-     </div>
+$$\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}$$
 
-     <div id="rendered-content"><em>Renderize o conteúdo para ver aqui</em></div>
+$$\sum_{n=1}^{\infty} \frac{1}{n^2} = \frac{\pi^2}{6}$$</textarea>
 
-     <!-- KaTeX JS -->
-     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+               <div class="actions">
+                    <button class="btn-primary" onclick="render()">Render</button>
+                    <button class="btn-secondary" onclick="exportPDF()">Export PDF</button>
+                    <button class="btn-secondary" onclick="clearEditor()">Clear</button>
+               </div>
+          </div>
 
-     <script>
-          function renderAula() {
-               const editor = document.getElementById("editor").value;
-               const container = document.getElementById("rendered-content");
+          <!-- Right: Preview panel -->
+          <div class="panel">
+               <div class="panel-header">
+                    <span class="panel-label">// preview</span>
+               </div>
+               <div id="preview">
+                    <p class="placeholder">// rendered output will appear here</p>
+               </div>
+          </div>
 
-               // Converte Markdown para HTML
-               const htmlContent = marked.parse(editor);
+     </main>
 
-               container.innerHTML = htmlContent;
+     <!-- ── Footer ── -->
+     <footer>
+          <span class="footer-note">
+               Powered by <a href="https://katex.org" target="_blank">KaTeX</a> — use <code>$$...$$</code> for block,
+               <code>$...$</code> for inline
+          </span>
+          <span class="footer-note">katex math formula online editor</span>
+     </footer>
 
-               // Renderiza fórmulas KaTeX
-               renderMathInElement(container, {
-                    delimiters: [
-                         { left: "$$", right: "$$", display: true },
-                         { left: "\\(", right: "\\)", display: false }
-                    ]
-               });
-          }
-
-          function exportPDF() {
-               renderAula();
-               window.print();
-          }
-     </script>
+     <!-- Script -->
+     <script src="script.js"></script>
 </body>
 
 </html>
